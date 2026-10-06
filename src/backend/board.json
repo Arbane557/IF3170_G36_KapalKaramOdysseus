@@ -24,7 +24,7 @@
       "weight": 35,
       "isFragile": false,
       "eta": 5,
-      "inTruck": true
+      "inTruck": false
     },
     {
       "id": "P03",
@@ -35,7 +35,7 @@
       "weight": 25,
       "isFragile": true,
       "eta": 2,
-      "inTruck": true
+      "inTruck": false
     },
     {
       "id": "P04",
@@ -46,7 +46,7 @@
       "weight": 45,
       "isFragile": false,
       "eta": 1,
-      "inTruck": true
+      "inTruck": false
     },
     {
       "id": "P05",
@@ -57,7 +57,7 @@
       "weight": 15,
       "isFragile": false,
       "eta": 4,
-      "inTruck": true
+      "inTruck": false
     }
   ]
 }

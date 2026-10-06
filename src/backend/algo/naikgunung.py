@@ -66,22 +66,44 @@ def neighbors(state: dict) -> list[dict]:
     ]
     
     for i, package in enumerate(state["packages"]):
-        if not package.get("inTruck", True):
-            continue
-        
-        for d in direction:
-            n = deepcopy(state)
+        if package.get("inTruck", True):        
+            for d in direction:
+                n = deepcopy(state)
+                
+                new_package = {
+                    "x" : package["position"]["x"] + d[0],
+                    "y" : package["position"]["y"] + d[1],
+                    "z" : package["position"]["z"] + d[2]
+                }
+                
+                n["packages"][i]["position"] = new_package
+                
+                if isvalid(n):
+                    res.append(n)
+        else:
+            package_dim = package["dimensions"]
+            truck_dim = state["truck"]["dimensions"]
             
-            new_package = {
-                "x" : package["position"]["x"] + d[0],
-                "y" : package["position"]["y"] + d[1],
-                "z" : package["position"]["z"] + d[2]
-            }
+            max_x = truck_dim["w"] - package_dim["w"]
+            max_y = truck_dim["h"] - package_dim["h"]
+            max_z = truck_dim["l"] - package_dim["l"]
             
-            n["packages"][i]["position"] = new_package
-            
-            if isvalid(n):
-                res.append(n)
+            for x in range(0, max_x + 1):
+                for y in range(0, max_y + 1):
+                    for z in range(0, max_z + 1):
+                        n = deepcopy(state)
+                        
+                        new_package = {
+                            "x" : x,
+                            "y" : y,
+                            "z" : z
+                        }
+                        
+                        n["packages"][i]["position"] = new_package
+                        n["packages"][i]["inTruck"] = True
+                        
+                        if isvalid(n):
+                            res.append(n)
         
     return res
             
