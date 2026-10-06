@@ -6,24 +6,57 @@
   "packages": [
     {
       "id": "P01",
-      "dimensions": { "w": 1, "l": 1, "h": 1 },
+      "dimensions": { "w": 2, "l": 3, "h": 2 },
       "position": { "x": 0, "y": 0, "z": 0 },
       "orientation": 0,
-      "value": 0,
-      "weight": 0,
+      "value": 60,
+      "weight": 20,
       "isFragile": false,
-      "eta": 0,
+      "eta": 3,
       "inTruck": true
     },
     {
       "id": "P02",
       "dimensions": { "w": 2, "l": 4, "h": 3 },
-      "position": { "x": 4, "y": 0, "z": 3 },
+      "position": { "x": 3, "y": 0, "z": 0 },
       "orientation": 0,
-      "value": 0,
-      "weight": 0,
+      "value": 90,
+      "weight": 35,
       "isFragile": false,
-      "eta": 0,
+      "eta": 5,
+      "inTruck": true
+    },
+    {
+      "id": "P03",
+      "dimensions": { "w": 3, "l": 2, "h": 2 },
+      "position": { "x": 6, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 75,
+      "weight": 25,
+      "isFragile": true,
+      "eta": 2,
+      "inTruck": true
+    },
+    {
+      "id": "P04",
+      "dimensions": { "w": 2, "l": 3, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 5 },
+      "orientation": 0,
+      "value": 110,
+      "weight": 45,
+      "isFragile": false,
+      "eta": 1,
+      "inTruck": true
+    },
+    {
+      "id": "P05",
+      "dimensions": { "w": 4, "l": 2, "h": 1 },
+      "position": { "x": 4, "y": 0, "z": 6 },
+      "orientation": 0,
+      "value": 50,
+      "weight": 15,
+      "isFragile": false,
+      "eta": 4,
       "inTruck": true
     }
   ]

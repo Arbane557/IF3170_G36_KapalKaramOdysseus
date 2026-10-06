@@ -15,6 +15,19 @@ type Board = {
   truck: { dimensions: Dimensions }
   packages: Package[]
 }
+type SearchStep = {
+  iteration: number
+  score: number
+  state: Board
+}
+type SolveResult = {
+  init: Board
+  steps: SearchStep[]
+  final: Board
+  initScore: number
+  finalScore: number
+  iterations: number
+}
 
 const viewport = document.querySelector<HTMLDivElement>('#viewport')!
 const status = document.querySelector<HTMLDivElement>('#status')!
@@ -71,15 +84,38 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera)
 })
 
-fetch(`http://localhost:6969/api/board`)
+// fetch(`http://localhost:6969/api/board`)
+//   .then((response) => {
+//     if (!response.ok) throw new Error(`HTTP ${response.status}`)
+//     return response.json() as Promise<Board>
+//   })
+//   .then((board) => {
+//     renderBoard(board)
+//     status.textContent = 'Board loaded'
+//   })
+//   .catch((error: unknown) => {
+//     status.textContent = `Backend error: ${error instanceof Error ? error.message : String(error)}`
+//   })
+
+fetch('http://localhost:6969/api/solve', { method: 'POST', })
   .then((response) => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    return response.json() as Promise<Board>
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    return response.json() as Promise<SolveResult>
   })
-  .then((board) => {
-    renderBoard(board)
-    status.textContent = 'Board loaded'
+  .then((result) => {
+    console.log(result)
+
+    renderBoard(result.final)
+
+    status.textContent =
+      `Solved Iterations: ${result.iterations}`
   })
   .catch((error: unknown) => {
-    status.textContent = `Backend error: ${error instanceof Error ? error.message : String(error)}`
+    status.textContent =
+      `Backend error: ${
+        error instanceof Error ? error.message : String(error)
+      }`
   })
