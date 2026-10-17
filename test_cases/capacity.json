@@ -1,0 +1,52 @@
+{
+  "truck": {
+    "dimensions": { "w": 6, "l": 6, "h": 4 },
+    "maxCapacity": 80
+  },
+  "packages": [
+    {
+      "id": "C01",
+      "dimensions": { "w": 2, "l": 2, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 120,
+      "weight": 60,
+      "isFragile": false,
+      "eta": 1,
+      "inTruck": false
+    },
+    {
+      "id": "C02",
+      "dimensions": { "w": 2, "l": 3, "h": 1 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 85,
+      "weight": 35,
+      "isFragile": false,
+      "eta": 2,
+      "inTruck": false
+    },
+    {
+      "id": "C03",
+      "dimensions": { "w": 1, "l": 2, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 60,
+      "weight": 25,
+      "isFragile": false,
+      "eta": 3,
+      "inTruck": false
+    },
+    {
+      "id": "C04",
+      "dimensions": { "w": 3, "l": 2, "h": 1 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 70,
+      "weight": 30,
+      "isFragile": true,
+      "eta": 4,
+      "inTruck": false
+    }
+  ]
+}

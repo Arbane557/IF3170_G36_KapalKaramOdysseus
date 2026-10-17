@@ -7,11 +7,15 @@
   </head>
   <body>
     <div id="app">
-      <div id="status">Loading board...</div>
+      <div id="status">Select a JSON file</div>
+      <div id="input-controls">
+        <input id="board-file" type="file" accept=".json,application/json" />
+        <button id="solve" disabled>Solve</button>
+      </div>
       <div id="controls">
-        <button id="previous">Previous</button>
-        <button id="play">Play</button>
-        <button id="next">Next</button>
+        <button id="previous" disabled>Previous</button>
+        <button id="play" disabled>Play</button>
+        <button id="next" disabled>Next</button>
       </div>
       <div id="viewport"></div>
     </div>

@@ -1,0 +1,140 @@
+{
+  "truck": {
+    "dimensions": { "w": 8, "l": 10, "h": 5 },
+    "maxCapacity": 220
+  },
+  "packages": [
+    {
+      "id": "L01",
+      "dimensions": { "w": 4, "l": 3, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 120,
+      "weight": 45,
+      "isFragile": false,
+      "eta": 1,
+      "inTruck": false
+    },
+    {
+      "id": "L02",
+      "dimensions": { "w": 3, "l": 3, "h": 3 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 105,
+      "weight": 40,
+      "isFragile": false,
+      "eta": 2,
+      "inTruck": false
+    },
+    {
+      "id": "L03",
+      "dimensions": { "w": 2, "l": 5, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 95,
+      "weight": 35,
+      "isFragile": false,
+      "eta": 3,
+      "inTruck": false
+    },
+    {
+      "id": "L04",
+      "dimensions": { "w": 5, "l": 2, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 90,
+      "weight": 30,
+      "isFragile": true,
+      "eta": 4,
+      "inTruck": false
+    },
+    {
+      "id": "L05",
+      "dimensions": { "w": 2, "l": 2, "h": 4 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 80,
+      "weight": 25,
+      "isFragile": false,
+      "eta": 5,
+      "inTruck": false
+    },
+    {
+      "id": "L06",
+      "dimensions": { "w": 3, "l": 4, "h": 1 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 75,
+      "weight": 20,
+      "isFragile": false,
+      "eta": 2,
+      "inTruck": false
+    },
+    {
+      "id": "L07",
+      "dimensions": { "w": 2, "l": 3, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 70,
+      "weight": 20,
+      "isFragile": true,
+      "eta": 3,
+      "inTruck": false
+    },
+    {
+      "id": "L08",
+      "dimensions": { "w": 1, "l": 5, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 65,
+      "weight": 15,
+      "isFragile": false,
+      "eta": 4,
+      "inTruck": false
+    },
+    {
+      "id": "L09",
+      "dimensions": { "w": 3, "l": 2, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 60,
+      "weight": 15,
+      "isFragile": false,
+      "eta": 5,
+      "inTruck": false
+    },
+    {
+      "id": "L10",
+      "dimensions": { "w": 2, "l": 2, "h": 2 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 55,
+      "weight": 15,
+      "isFragile": false,
+      "eta": 1,
+      "inTruck": false
+    },
+    {
+      "id": "L11",
+      "dimensions": { "w": 1, "l": 3, "h": 1 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 40,
+      "weight": 10,
+      "isFragile": true,
+      "eta": 2,
+      "inTruck": false
+    },
+    {
+      "id": "L12",
+      "dimensions": { "w": 1, "l": 2, "h": 1 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 35,
+      "weight": 10,
+      "isFragile": false,
+      "eta": 3,
+      "inTruck": false
+    }
+  ]
+}

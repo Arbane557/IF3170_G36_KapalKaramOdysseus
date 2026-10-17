@@ -24,15 +24,25 @@ body {
   background: rgb(0 0 0 / 65%);
 }
 
+#input-controls,
 #controls {
   position: fixed;
   z-index: 1;
-  top: 5rem;
   left: 1rem;
   display: flex;
+  gap: 0.25rem;
 }
 
+#input-controls {
+  top: 4rem;
+  color: white;
+}
 
+#controls {
+  top: 7rem;
+}
+
+#input-controls button,
 #controls button {
   padding: 0.5rem 0.75rem;
   border: 0;
@@ -42,10 +52,12 @@ body {
   cursor: pointer;
 }
 
+#input-controls button:hover,
 #controls button:hover {
   background: rgb(0 0 0 / 85%);
 }
 
+#input-controls button:disabled,
 #controls button:disabled {
   opacity: 0.4;
   cursor: default;
