@@ -210,13 +210,13 @@ def neighbors(state: dict) -> list[dict]:
 
     return res
 
-def solve(board: dict, max_iter: int = 100,T=100,coolingrate=1/2) -> dict:
+def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max_iter: int = 1000 ) -> dict:
     curr = deepcopy(board)
     init = deepcopy(curr)
     history = []
 
     for iteration in range(0, max_iter):
-        T*=coolingrate
+        temperature*=cooling_rate
         next=choice(neighbors(curr))
         delta_E=scoring(next)-scoring(curr)
         if(delta_E>0):
