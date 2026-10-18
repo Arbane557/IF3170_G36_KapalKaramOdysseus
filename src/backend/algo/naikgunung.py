@@ -210,7 +210,7 @@ def neighbors(state: dict) -> list[dict]:
     return res
 
 
-def solve(board: dict, max_iter: int = 100) -> dict:
+def solve_steepest(board: dict, max_iter: int = 100) -> dict:
     curr = deepcopy(board)
     init = deepcopy(curr)
     history = []
@@ -268,6 +268,8 @@ def solve(board: dict, max_iter: int = 100) -> dict:
         })
 
     return {
+        "algorithm" : "hill-climbing-steepest",
+        "implemented" : True,
         "init" : init,
         "steps" : history,
         "final" : curr,
@@ -275,4 +277,16 @@ def solve(board: dict, max_iter: int = 100) -> dict:
         "finalScore" : scoring(curr),
         "iterations" : len(history)
     }
+
+
+def solve_stochastic(board: dict, max_iter: int = 100) -> dict:
+    return {}
+
+
+def solve_sideways(board: dict, max_iter: int = 100, max_sideways: int = 20) -> dict:
+    return {}
+
+
+def solve_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10) -> dict:
+    return {}
 

@@ -221,7 +221,7 @@ function runSolver(board: Board): void {
   solveButton.disabled = true
   status.textContent = 'Solving...'
 
-  fetch('http://localhost:6969/api/solve', {
+  fetch('http://localhost:6969/api/solve/hill-climbing/steepest', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(board),
