@@ -8,7 +8,7 @@ from algo.naikgunung import (
     solve_steepest,
     solve_stochastic,
 )
-from algo.sa import solve as solve_sa
+from algo.besipanas import solve as solve_sa
 
 app = FastAPI()
 app.add_middleware(

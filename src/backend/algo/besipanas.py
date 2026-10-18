@@ -221,7 +221,7 @@ def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max
         delta_E=scoring(next)-scoring(curr)
         if(delta_E>0):
             curr = next
-        elif(random()<exp(delta_E/T)):
+        elif(random()<exp(delta_E/temperature)):
             curr = next
         history.append({
             "iteration" : iteration + 1,
