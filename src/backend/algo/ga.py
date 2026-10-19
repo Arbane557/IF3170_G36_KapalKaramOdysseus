@@ -2,7 +2,7 @@ from copy import deepcopy
 from random import Random
 from time import perf_counter
 
-from algo.naikgunung import curr_dimension, isvalid, scoring
+from algo.common import create_random_individual, scoring, empty_state, place_at, find_random_valid_placement, isvalid,  find_random_valid_position
 
 ROTATION_NEIGHBORS = {
     0: (1, 3, 4),
@@ -16,107 +16,6 @@ ROTATION_NEIGHBORS = {
 
 def fitness(state: dict) -> float:
     return scoring(state)
-
-
-def empty_state(board: dict) -> dict:
-    state = deepcopy(board)
-    for package in state["packages"]:
-        package["inTruck"] = False
-    return state
-
-
-def place_at(
-    state: dict,
-    package_index: int,
-    orientation: int,
-    position: dict[str, int],
-) -> bool:
-    package = state["packages"][package_index]
-    package["orientation"] = orientation
-    package["position"] = position
-    package["inTruck"] = True
-    return isvalid(state)
-
-
-def find_random_valid_placement(state: dict, package_index: int, rng: Random) -> bool:
-    truck_dimensions = state["truck"]["dimensions"]
-    orientations = list(range(6))
-    rng.shuffle(orientations)
-
-    for orientation in orientations:
-        package = deepcopy(state["packages"][package_index])
-        package["orientation"] = orientation
-        dimensions = curr_dimension(package)
-        max_x = truck_dimensions["w"] - dimensions["w"]
-        max_y = truck_dimensions["h"] - dimensions["h"]
-        max_z = truck_dimensions["l"] - dimensions["l"]
-
-        if max_x < 0 or max_y < 0 or max_z < 0:
-            continue
-
-        positions = [
-            {"x": x, "y": y, "z": z}
-            for x in range(max_x + 1)
-            for y in range(max_y + 1)
-            for z in range(max_z + 1)
-        ]
-        rng.shuffle(positions)
-
-        for position in positions:
-            candidate = deepcopy(state)
-            if place_at(candidate, package_index, orientation, position):
-                state.clear()
-                state.update(candidate)
-                return True
-
-    return False
-
-
-def find_random_valid_position(state: dict, package_index: int, rng: Random) -> bool:
-    truck_dimensions = state["truck"]["dimensions"]
-    package = state["packages"][package_index]
-    dimensions = curr_dimension(package)
-    max_x = truck_dimensions["w"] - dimensions["w"]
-    max_y = truck_dimensions["h"] - dimensions["h"]
-    max_z = truck_dimensions["l"] - dimensions["l"]
-
-    if max_x < 0 or max_y < 0 or max_z < 0:
-        return False
-
-    positions = [
-        {"x": x, "y": y, "z": z}
-        for x in range(max_x + 1)
-        for y in range(max_y + 1)
-        for z in range(max_z + 1)
-    ]
-    rng.shuffle(positions)
-
-    for position in positions:
-        candidate = deepcopy(state)
-        if place_at(candidate, package_index, package["orientation"], position):
-            state.clear()
-            state.update(candidate)
-            return True
-
-    return False
-
-
-def create_random_individual(board: dict, rng: Random) -> dict:
-    individual = empty_state(board)
-    package_indices = list(range(len(individual["packages"])))
-    rng.shuffle(package_indices)
-
-    for package_index in package_indices:
-        if rng.random() < 0.75:
-            find_random_valid_placement(individual, package_index, rng)
-
-    if fitness(individual) == 0:
-        for package_index in package_indices:
-            if find_random_valid_placement(individual, package_index, rng):
-                break
-
-    return individual
-
 
 def selection(population: list[dict], rng: Random) -> dict:
     total_fitness = 0

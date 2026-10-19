@@ -40,7 +40,7 @@ def run_stochastic(board: dict, max_iter: int = 100, seed: int = 0) -> dict:
 @app.post("/api/solve/hill-climbing/sideways")
 def run_sideways(board: dict, max_iter: int = 100, max_sideways: int = 20, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_sideways(board, max_iter, max_sideways)
+    return solve_sideways(board, max_iter, max_sideways,seed)
 
 @app.post("/api/solve/hill-climbing/random-restart")
 def run_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10, seed: int = 0) -> dict:
