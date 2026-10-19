@@ -84,11 +84,9 @@ def gen_random_suc(curr):
         package= curr["packages"][i]
         truck_dim = curr["truck"]["dimensions"]
 
-        do_swap, do_move, do_rotate = [random() < 0.5 for _ in range(3)]
-        if(not (do_swap or do_move or do_rotate)):
-            continue
+        action = choice(["swap", "move", "rotate"])
 
-        orientation= choice([o for o in range(6) if o != package["orientation"]]) if do_rotate else package["orientation"]
+        orientation= choice([o for o in range(6) if o != package["orientation"]]) if action=="rotate" else package["orientation"]
         rotated = deepcopy(package)
         rotated["orientation"] = orientation
         dim = curr_dimension(rotated)
@@ -96,7 +94,7 @@ def gen_random_suc(curr):
         if(truck_dim["w"] - dim["w"] + 1<=0 or truck_dim["h"] - dim["h"] + 1<=0 or truck_dim["l"] - dim["l"] + 1<=0):
             continue
         position = package["position"]
-        if(do_move):
+        if(action=="move"):
             x=randrange(truck_dim["w"] - dim["w"] + 1)
             y=randrange(truck_dim["h"] - dim["h"] + 1)
             z=randrange(truck_dim["l"] - dim["l"] + 1)
@@ -106,7 +104,7 @@ def gen_random_suc(curr):
         candidate["packages"][i]["orientation"] = orientation
         candidate["packages"][i]["position"] = position
 
-        if(do_swap):
+        if(action=="swap"):
             if(len(curr["packages"]) < 2):
                 continue
             j = choice([k for k, _ in enumerate(curr["packages"]) if k != i])
