@@ -13,9 +13,13 @@ type Package = {
   id: string
   inTruck: boolean
   orientation: number
+  value: number
+  weight: number
+  isFragile: boolean
+  eta: number
 }
 type Board = {
-  truck: { dimensions: Dimensions }
+  truck: { dimensions: Dimensions; maxCapacity: number }
   packages: Package[]
 }
 type SearchStep = {
@@ -57,6 +61,7 @@ const previousButton = document.querySelector<HTMLButtonElement>('#previous')!
 const playButton = document.querySelector<HTMLButtonElement>('#play')!
 const nextButton = document.querySelector<HTMLButtonElement>('#next')!
 const boardFileInput = document.querySelector<HTMLInputElement>('#board-file')!
+const saveJsonButton = document.querySelector<HTMLButtonElement>('#save-json')!
 const solveButton = document.querySelector<HTMLButtonElement>('#solve')!
 const algorithmSelect = document.querySelector<HTMLSelectElement>('#algorithm')!
 const maxIterInput = document.querySelector<HTMLInputElement>('#max-iter')!
@@ -73,12 +78,29 @@ const populationField = document.querySelector<HTMLElement>('#population-field')
 const statsContent = document.querySelector<HTMLDivElement>('#stats-content')!
 const scoreChart = document.querySelector<SVGSVGElement>('#score-chart')!
 const probabilityChart = document.querySelector<SVGSVGElement>('#probability-chart')!
+const seedInput = document.querySelector<HTMLInputElement>('#seed')!
+const truckWInput = document.querySelector<HTMLInputElement>('#truck-w')!
+const truckLInput = document.querySelector<HTMLInputElement>('#truck-l')!
+const truckHInput = document.querySelector<HTMLInputElement>('#truck-h')!
+const truckCapacityInput = document.querySelector<HTMLInputElement>('#truck-capacity')!
+const packageList = document.querySelector<HTMLTableSectionElement>('#package-list')!
+const packageCount = document.querySelector<HTMLSpanElement>('#package-count')!
+const packageForm = document.querySelector<HTMLFormElement>('#package-form')!
+const packageTooltip = document.querySelector<HTMLDivElement>('#package-tooltip')!
+const pkgIdInput = document.querySelector<HTMLInputElement>('#pkg-id')!
+const pkgWInput = document.querySelector<HTMLInputElement>('#pkg-w')!
+const pkgLInput = document.querySelector<HTMLInputElement>('#pkg-l')!
+const pkgHInput = document.querySelector<HTMLInputElement>('#pkg-h')!
+const pkgValueInput = document.querySelector<HTMLInputElement>('#pkg-value')!
+const pkgWeightInput = document.querySelector<HTMLInputElement>('#pkg-weight')!
+const pkgEtaInput = document.querySelector<HTMLInputElement>('#pkg-eta')!
+const pkgFragileInput = document.querySelector<HTMLInputElement>('#pkg-fragile')!
 
 // three js parts 
 const packageGroup = new THREE.Group()
 const truckGroup = new THREE.Group()
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0x676767)
+scene.background = new THREE.Color(0xd4d4d4)
 scene.add(packageGroup)
 scene.add(truckGroup)
 
@@ -90,14 +112,16 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 viewport.appendChild(renderer.domElement)
 
 const controls = new OrbitControls(camera, renderer.domElement)
+const raycaster = new THREE.Raycaster()
+const pointer = new THREE.Vector2()
 
 const packageColors = [
-  0x38bdf8,
-  0xfb7185,
-  0x4ade80,
-  0xfacc15,
-  0xc084fc,
-  0xfb923c,
+  0x4a90e2,
+  0xe57373,
+  0x66bb6a,
+  0xffb74d,
+  0x9575cd,
+  0x78909c,
 ]
 
 function get_dim_on_rot(pos: Package): Dimensions {
@@ -131,9 +155,10 @@ function addBox(pkg: Package, color: number): void {
   const mesh = new THREE.Mesh(geometry, material)
   const outline = new THREE.LineSegments(
     new THREE.EdgesGeometry(geometry),
-    new THREE.LineBasicMaterial({ color: 0x111827 }),
+    new THREE.LineBasicMaterial({ color: 0x222222 }),
   )
   mesh.add(outline)
+  mesh.userData.package = pkg
   mesh.position.set(pkg["position"].x + w / 2, pkg["position"].y + h / 2, pkg["position"].z + l / 2)
   packageGroup.add(mesh)
 }
@@ -144,12 +169,55 @@ function renderTruck(board: Board): void {
 
   const truck = new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, l)),
-    new THREE.LineBasicMaterial({ color: 0xffffff }),
+    new THREE.LineBasicMaterial({ color: 0x333333 }),
   )
   truck.position.set(w / 2, h / 2, l / 2)
   truckGroup.add(truck)
 
+  const points: THREE.Vector3[] = []
+  for (let x = 0; x <= w; x++) {
+    points.push(new THREE.Vector3(x, 0, 0), new THREE.Vector3(x, 0, l))
+    points.push(new THREE.Vector3(x, 0, 0), new THREE.Vector3(x, h, 0))
+  }
+  for (let z = 0; z <= l; z++) {
+    points.push(new THREE.Vector3(0, 0, z), new THREE.Vector3(w, 0, z))
+    points.push(new THREE.Vector3(0, 0, z), new THREE.Vector3(0, h, z))
+  }
+  for (let y = 0; y <= h; y++) {
+    points.push(new THREE.Vector3(0, y, 0), new THREE.Vector3(w, y, 0))
+    points.push(new THREE.Vector3(0, y, 0), new THREE.Vector3(0, y, l))
+  }
+  truckGroup.add(new THREE.LineSegments(
+    new THREE.BufferGeometry().setFromPoints(points),
+    new THREE.LineBasicMaterial({ color: 0x4b5563, transparent: true, opacity: 0.75 }),
+  ))
+
+  const addNumber = (value: number, x: number, y: number, z: number): void => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 64
+    canvas.height = 64
+    const context = canvas.getContext('2d')!
+    context.fillStyle = '#222222'
+    context.font = '32px Arial'
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.fillText(String(value), 32, 32)
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(canvas),
+      depthTest: false,
+    }))
+    sprite.position.set(x, y, z)
+    sprite.scale.set(0.45, 0.45, 0.45)
+    truckGroup.add(sprite)
+  }
+
+  for (let x = 0; x <= w; x++) addNumber(x, x, -0.18, -0.25)
+  for (let z = 1; z <= l; z++) addNumber(z, -0.25, -0.18, z)
+  for (let y = 1; y <= h; y++) addNumber(y, -0.25, y, 0)
+
   controls.target.set(w / 2, h / 2, l / 2)
+  const distance = Math.max(w, l, h) * 1.6
+  camera.position.set(distance, distance * 0.8, distance)
   controls.update()
 }
 
@@ -181,6 +249,91 @@ let frames: Replay[] = []
 let currentFrame = 0
 let playbackTimer: number | undefined
 let selectedBoard: Board | undefined
+
+function inputNumber(input: HTMLInputElement): number {
+  return Number(input.value)
+}
+
+function makeBoaord(): Board {
+  if (!selectedBoard) {
+    selectedBoard = {
+      truck: {
+        dimensions: {
+          w: inputNumber(truckWInput),
+          l: inputNumber(truckLInput),
+          h: inputNumber(truckHInput),
+        },
+        maxCapacity: inputNumber(truckCapacityInput),
+      },
+      packages: [],
+    }
+  }
+  return selectedBoard
+}
+
+function renderPackageList(): void {
+  const packages = selectedBoard?.packages ?? []
+  packageCount.textContent = `${packages.length} item${packages.length === 1 ? '' : 's'}`
+  packageList.innerHTML = ''
+
+  if (packages.length === 0) {
+    const row = packageList.insertRow()
+    const cell = row.insertCell()
+    cell.colSpan = 10
+    cell.className = 'empty'
+    cell.textContent = 'No packages yet'
+    return
+  }
+
+  packages.forEach((pkg, index) => {
+    const row = packageList.insertRow()
+    const values = [
+      pkg.id,
+      `${pkg.dimensions.w}×${pkg.dimensions.l}×${pkg.dimensions.h}`,
+      `${pkg.position.x}, ${pkg.position.y}, ${pkg.position.z}`,
+      String(pkg.orientation),
+      String(pkg.value),
+      String(pkg.weight),
+      String(pkg.eta),
+      pkg.inTruck ? 'Inside' : 'Outside',
+      pkg.isFragile ? 'Yes' : 'No',
+    ]
+    values.forEach((value) => {
+      const cell = row.insertCell()
+      cell.textContent = value
+    })
+    const action = row.insertCell()
+    const remove = document.createElement('button')
+    remove.type = 'button'
+    remove.textContent = '×'
+    remove.title = `Remove ${pkg.id}`
+    remove.addEventListener('click', () => {
+      selectedBoard?.packages.splice(index, 1)
+      renderPackageList()
+      solveButton.disabled = !selectedBoard?.packages.length
+    })
+    action.appendChild(remove)
+  })
+}
+
+function loadBoardIntoEditor(board: Board): void {
+  selectedBoard = board
+  truckWInput.value = String(board.truck.dimensions.w)
+  truckLInput.value = String(board.truck.dimensions.l)
+  truckHInput.value = String(board.truck.dimensions.h)
+  truckCapacityInput.value = String(board.truck.maxCapacity)
+  frames = []
+  packageGroup.clear()
+  renderTruck(board)
+  renderPackageList()
+  statsContent.textContent = 'No result yet'
+  scoreChart.style.display = 'none'
+  probabilityChart.style.display = 'none'
+  previousButton.disabled = true
+  playButton.disabled = true
+  nextButton.disabled = true
+  solveButton.disabled = board.packages.length === 0
+}
 
 function updateParameterFields(): void {
   const algorithm = algorithmSelect.value
@@ -329,7 +482,10 @@ function runSolver(board: Board): void {
   solveButton.disabled = true
   status.textContent = 'Solving...'
 
-  const params = new URLSearchParams({ max_iter: maxIterInput.value })
+  const params = new URLSearchParams({
+    max_iter: maxIterInput.value,
+    seed: seedInput.value,
+  })
   if (algorithmSelect.value === 'hill-climbing/sideways') params.set('max_sideways', maxSidewaysInput.value)
   if (algorithmSelect.value === 'hill-climbing/random-restart') params.set('max_restart', maxRestartInput.value)
   if (algorithmSelect.value === 'simulated-annealing') {
@@ -399,20 +555,107 @@ solveButton.addEventListener('click', () => {
 algorithmSelect.addEventListener('change', updateParameterFields)
 updateParameterFields()
 
+for (const input of [truckWInput, truckLInput, truckHInput, truckCapacityInput]) {
+  input.addEventListener('change', () => {
+    const board = makeBoaord()
+    board.truck.dimensions = {
+      w: inputNumber(truckWInput),
+      l: inputNumber(truckLInput),
+      h: inputNumber(truckHInput),
+    }
+    board.truck.maxCapacity = inputNumber(truckCapacityInput)
+    renderTruck(board)
+    status.textContent = 'Truck updated'
+  })
+}
+
+packageForm.addEventListener('submit', (event) => {
+  event.preventDefault()
+  const board = makeBoaord()
+  const id = pkgIdInput.value.trim()
+  if (!id || board.packages.some((pkg) => pkg.id === id)) {
+    status.textContent = 'Package ID must be unique'
+    return
+  }
+
+  board.packages.push({
+    id,
+    dimensions: { w: inputNumber(pkgWInput), l: inputNumber(pkgLInput), h: inputNumber(pkgHInput) },
+    position: { x: 0, y: 0, z: 0 },
+    orientation: 0,
+    value: inputNumber(pkgValueInput),
+    weight: inputNumber(pkgWeightInput),
+    isFragile: pkgFragileInput.checked,
+    eta: inputNumber(pkgEtaInput),
+    inTruck: false,
+  })
+
+  renderPackageList()
+  solveButton.disabled = false
+  pkgIdInput.value = `P${String(board.packages.length + 1).padStart(2, '0')}`
+  status.textContent = `${id} added outside the truck`
+})
+
+renderer.domElement.addEventListener('pointermove', (event) => {
+  const rect = renderer.domElement.getBoundingClientRect()
+  pointer.x = (event.clientX - rect.left) / rect.width * 2 - 1
+  pointer.y = -(event.clientY - rect.top) / rect.height * 2 + 1
+  raycaster.setFromCamera(pointer, camera)
+  const hit = raycaster.intersectObjects(packageGroup.children, true)[0]
+  let object: THREE.Object3D | null = hit?.object ?? null
+  while (object && !object.userData.package) object = object.parent
+
+  const pkg = object?.userData.package as Package | undefined
+  if (!pkg) {
+    packageTooltip.style.display = 'none'
+    return
+  }
+
+  packageTooltip.textContent = `${pkg.id}\nValue ${pkg.value} · Weight ${pkg.weight}\n${pkg.dimensions.w}×${pkg.dimensions.l}×${pkg.dimensions.h} · Orientation ${pkg.orientation}\nPosition ${pkg.position.x}, ${pkg.position.y}, ${pkg.position.z}${pkg.isFragile ? ' · Fragile' : ''}`
+  packageTooltip.style.display = 'block'
+  packageTooltip.style.left = `${event.clientX + 12}px`
+  packageTooltip.style.top = `${event.clientY + 12}px`
+})
+
+renderer.domElement.addEventListener('pointerleave', () => {
+  packageTooltip.style.display = 'none'
+})
+
 boardFileInput.addEventListener('change', async () => {
   const file = boardFileInput.files?.[0]
   if (!file) return
 
   try {
-    selectedBoard = JSON.parse(await file.text()) as Board
+    const board = JSON.parse(await file.text()) as Board
+    loadBoardIntoEditor(board)
     status.textContent = `${file.name} ready`
-    solveButton.disabled = false
-    previousButton.disabled = true
-    playButton.disabled = true
-    nextButton.disabled = true
   } catch {
     selectedBoard = undefined
     solveButton.disabled = true
     status.textContent = 'Invalid JSON file'
   }
 })
+
+saveJsonButton.addEventListener('click', () => {
+  const board = makeBoaord()
+  board.truck.dimensions = {
+    w: inputNumber(truckWInput),
+    l: inputNumber(truckLInput),
+    h: inputNumber(truckHInput),
+  }
+  board.truck.maxCapacity = inputNumber(truckCapacityInput)
+
+  const url = URL.createObjectURL(new Blob(
+    [JSON.stringify(board, null, 2)],
+    { type: 'application/json' },
+  ))
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'truck-config.json'
+  link.click()
+  URL.revokeObjectURL(url)
+  status.textContent = 'Configuration saved'
+})
+
+renderTruck(makeBoaord())
+renderPackageList()

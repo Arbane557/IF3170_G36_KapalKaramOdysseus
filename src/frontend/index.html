@@ -3,41 +3,80 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mejiro Express</title>
+    <title>3D Truck Loading</title>
   </head>
   <body>
     <div id="app">
-      <div id="status">Select a JSON file</div>
-      <div id="input-controls">
-        <input id="board-file" type="file" accept=".json,application/json" />
-        <select id="algorithm">
-          <option value="hill-climbing/steepest">Steepest Ascent</option>
-          <option value="hill-climbing/stochastic">Stochastic HC</option>
-          <option value="hill-climbing/sideways">HC Sideways</option>
-          <option value="hill-climbing/random-restart">Random Restart HC</option>
-          <option value="simulated-annealing">Simulated Annealing</option>
-          <option value="genetic-algorithm">Genetic Algorithm</option>
-        </select>
-        <label>Iterations <input id="max-iter" type="number" value="100" min="1" /></label>
-        <label id="sideways-field">Sideways <input id="max-sideways" type="number" value="20" min="0" /></label>
-        <label id="restart-field">Restarts <input id="max-restart" type="number" value="10" min="1" /></label>
-        <label id="temperature-field">Temperature <input id="temperature" type="number" value="100" min="0.001" step="0.1" /></label>
-        <label id="cooling-field">Cooling <input id="cooling-rate" type="number" value="0.95" min="0.001" max="0.999" step="0.001" /></label>
-        <label id="population-field">Population <input id="population-size" type="number" value="20" min="2" /></label>
-        <button id="solve" disabled>Solve</button>
-      </div>
-      <div id="controls">
-        <button id="previous" disabled>Previous</button>
-        <button id="play" disabled>Play</button>
-        <button id="next" disabled>Next</button>
-      </div>
-      <aside id="stats">
-        <h2>Run Statistics</h2>
-        <div id="stats-content">No result yet</div>
-        <svg id="score-chart" viewBox="0 0 300 130" aria-label="Objective score plot"></svg>
-        <svg id="probability-chart" viewBox="0 0 300 130" aria-label="Acceptance probability plot"></svg>
+      <aside id="editor">
+        <section>
+          <h2>Truck</h2>
+          <div class="field-grid four">
+            <label>Width<input id="truck-w" type="number" value="5" min="1" /></label>
+            <label>Length<input id="truck-l" type="number" value="6" min="1" /></label>
+            <label>Height<input id="truck-h" type="number" value="4" min="1" /></label>
+            <label>Capacity<input id="truck-capacity" type="number" value="100" min="1" /></label>
+          </div>
+        </section>
+        <section>
+          <div class="section-title"><h2>Packages</h2><span id="package-count">0 items</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Size</th><th>Position</th><th>Ori.</th><th>Value</th><th>Weight</th><th>ETA</th><th>State</th><th>Fragile</th><th></th></tr></thead>
+              <tbody id="package-list"><tr><td colspan="10" class="empty">No packages yet</td></tr></tbody>
+            </table>
+          </div>
+          <form id="package-form">
+            <div class="field-grid four">
+              <label>ID<input id="pkg-id" value="P01" required /></label>
+              <label>Width<input id="pkg-w" type="number" value="1" min="1" required /></label>
+              <label>Length<input id="pkg-l" type="number" value="1" min="1" required /></label>
+              <label>Height<input id="pkg-h" type="number" value="1" min="1" required /></label>
+              <label>Value<input id="pkg-value" type="number" value="10" min="0" required /></label>
+              <label>Weight<input id="pkg-weight" type="number" value="1" min="0" required /></label>
+              <label>ETA<input id="pkg-eta" type="number" value="1" min="0" required /></label>
+              <label class="check"><input id="pkg-fragile" type="checkbox" /> Fragile</label>
+            </div>
+            <button type="submit">Add package</button>
+          </form>
+        </section>
+        <section>
+          <h2>Search</h2>
+          <div class="field-grid two">
+            <label class="wide">Algorithm<select id="algorithm">
+              <option value="hill-climbing/steepest">Steepest Ascent</option>
+              <option value="hill-climbing/stochastic">Stochastic HC</option>
+              <option value="hill-climbing/sideways">HC Sideways</option>
+              <option value="hill-climbing/random-restart">Random Restart HC</option>
+              <option value="simulated-annealing">Simulated Annealing</option>
+              <option value="genetic-algorithm">Genetic Algorithm</option>
+            </select></label>
+            <label>Seed<input id="seed" type="number" value="0" /></label>
+            <label>Iterations<input id="max-iter" type="number" value="100" min="1" /></label>
+            <label id="sideways-field">Sideways<input id="max-sideways" type="number" value="20" min="0" /></label>
+            <label id="restart-field">Restarts<input id="max-restart" type="number" value="10" min="1" /></label>
+            <label id="temperature-field">Temperature<input id="temperature" type="number" value="100" min="0.001" step="0.1" /></label>
+            <label id="cooling-field">Cooling<input id="cooling-rate" type="number" value="0.95" min="0.001" max="0.999" step="0.001" /></label>
+            <label id="population-field">Population<input id="population-size" type="number" value="20" min="2" /></label>
+          </div>
+        </section>
+        <div class="actions">
+          <label class="file-button">Load JSON<input id="board-file" type="file" accept=".json,application/json" /></label>
+          <button id="save-json" type="button">Save JSON</button>
+          <button id="solve" disabled>Solve board</button>
+        </div>
       </aside>
-      <div id="viewport"></div>
+      <main id="workspace">
+        <div id="toolbar">
+          <div id="status">Configure a truck or load JSON</div>
+          <div id="controls"><button id="previous" disabled>Previous</button><button id="play" disabled>Play</button><button id="next" disabled>Next</button></div>
+        </div>
+        <div id="viewport"><div id="package-tooltip"></div></div>
+        <aside id="stats">
+          <h2>Run statistics</h2><div id="stats-content">No result yet</div>
+          <svg id="score-chart" viewBox="0 0 300 130" aria-label="Objective score plot"></svg>
+          <svg id="probability-chart" viewBox="0 0 300 130" aria-label="Acceptance probability plot"></svg>
+        </aside>
+      </main>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
