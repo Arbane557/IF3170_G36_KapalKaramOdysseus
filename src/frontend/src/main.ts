@@ -74,9 +74,11 @@ type Replay = {
 
 const viewport = document.querySelector<HTMLDivElement>('#viewport')!
 const status = document.querySelector<HTMLDivElement>('#status')!
+const firstButton = document.querySelector<HTMLButtonElement>('#first')!
 const previousButton = document.querySelector<HTMLButtonElement>('#previous')!
 const playButton = document.querySelector<HTMLButtonElement>('#play')!
 const nextButton = document.querySelector<HTMLButtonElement>('#next')!
+const lastButton = document.querySelector<HTMLButtonElement>('#last')!
 const boardFileInput = document.querySelector<HTMLInputElement>('#board-file')!
 const saveJsonButton = document.querySelector<HTMLButtonElement>('#save-json')!
 const solveButton = document.querySelector<HTMLButtonElement>('#solve')!
@@ -346,9 +348,11 @@ function loadBoardIntoEditor(board: Board): void {
   statsContent.textContent = 'No result yet'
   scoreChart.style.display = 'none'
   probabilityChart.style.display = 'none'
+  firstButton.disabled = true
   previousButton.disabled = true
   playButton.disabled = true
   nextButton.disabled = true
+  lastButton.disabled = true
   solveButton.disabled = board.packages.length === 0
 }
 
@@ -519,6 +523,8 @@ function showFrame(index: number): void {
 
   previousButton.disabled = currentFrame === 0
   nextButton.disabled = currentFrame === frames.length - 1
+  firstButton.disabled = currentFrame === 0
+  lastButton.disabled = currentFrame === frames.length - 1
   playButton.disabled = frames.length <= 1
 }
 
@@ -553,9 +559,19 @@ previousButton.addEventListener('click', () => {
   showFrame(currentFrame - 1)
 })
 
+firstButton.addEventListener('click', () => {
+  stopPlayback()
+  showFrame(0)
+})
+
 nextButton.addEventListener('click', () => {
   stopPlayback()
   showFrame(currentFrame + 1)
+})
+
+lastButton.addEventListener('click', () => {
+  stopPlayback()
+  showFrame(frames.length - 1)
 })
 
 playButton.addEventListener('click', () => {
