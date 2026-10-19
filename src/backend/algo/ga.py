@@ -2,7 +2,15 @@ from copy import deepcopy
 from random import Random
 from time import perf_counter
 
-from algo.common import create_random_individual, scoring, empty_state, place_at, find_random_valid_placement, isvalid,  find_random_valid_position
+from algo.common import (
+    create_random_individual,
+    curr_dimension,
+    empty_state,
+    find_random_valid_placement,
+    isvalid,
+    place_at,
+    scoring,
+)
 
 ROTATION_NEIGHBORS = {
     0: (1, 3, 4),
@@ -83,10 +91,38 @@ def mutate(individual: dict, rng: Random, mutation_rate: float = 0.15) -> dict:
 
     if operation == "move":
         package_index = rng.randrange(package_count)
+        current_package = mutated["packages"][package_index]
         trial = deepcopy(mutated)
         trial["packages"][package_index]["inTruck"] = False
-        if find_random_valid_position(trial, package_index, rng):
-            return trial
+        package = trial["packages"][package_index]
+        dimensions = curr_dimension(package)
+        truck_dimensions = trial["truck"]["dimensions"]
+        max_x = truck_dimensions["w"] - dimensions["w"]
+        max_y = truck_dimensions["h"] - dimensions["h"]
+        max_z = truck_dimensions["l"] - dimensions["l"]
+
+        if max_x >= 0 and max_y >= 0 and max_z >= 0:
+            for _ in range(30):
+                position = {
+                    "x": rng.randrange(max_x + 1),
+                    "y": rng.randrange(max_y + 1),
+                    "z": rng.randrange(max_z + 1),
+                }
+
+                if current_package.get("inTruck", False):
+                    if position == current_package.get("position"):
+                        continue
+
+                candidate = deepcopy(trial)
+                is_placed = place_at(
+                    candidate,
+                    package_index,
+                    package.get("orientation", 0),
+                    position,
+                )
+
+                if is_placed:
+                    return candidate
 
     elif operation == "swap" and package_count >= 2:
         first, second = rng.sample(range(package_count), 2)

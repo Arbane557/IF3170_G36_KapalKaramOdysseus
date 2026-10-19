@@ -173,35 +173,6 @@ def find_random_valid_placement(state: dict, package_index: int, rng: Random) ->
     return False
 
 
-def find_random_valid_position(state: dict, package_index: int, rng: Random) -> bool:
-    truck_dimensions = state["truck"]["dimensions"]
-    package = state["packages"][package_index]
-    dimensions = curr_dimension(package)
-    max_x = truck_dimensions["w"] - dimensions["w"]
-    max_y = truck_dimensions["h"] - dimensions["h"]
-    max_z = truck_dimensions["l"] - dimensions["l"]
-
-    if max_x < 0 or max_y < 0 or max_z < 0:
-        return False
-
-    positions = [
-        {"x": x, "y": y, "z": z}
-        for x in range(max_x + 1)
-        for y in range(max_y + 1)
-        for z in range(max_z + 1)
-    ]
-    rng.shuffle(positions)
-
-    for position in positions:
-        candidate = deepcopy(state)
-        if place_at(candidate, package_index, package["orientation"], position):
-            state.clear()
-            state.update(candidate)
-            return True
-
-    return False
-
-
 def create_random_individual(board: dict, rng: Random) -> dict:
     individual = empty_state(board)
     package_indices = list(range(len(individual["packages"])))
