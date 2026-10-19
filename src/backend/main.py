@@ -20,6 +20,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def run_timed(solver, *args) -> dict:
+    started_at = perf_counter()
+    result = solver(*args)
+    result["duration"] = perf_counter() - started_at
+    return result
+
 @app.get("/api/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -27,32 +33,29 @@ def health() -> dict[str, str]:
 @app.post("/api/solve/hill-climbing/steepest")
 def run_steepest(board: dict, max_iter: int = 100, seed: int = 0) -> dict:
     set_seed(seed)
-    start = perf_counter()
-    result = solve_steepest(board, max_iter)
-    result["duration"] = perf_counter() - start
-    return result
+    return run_timed(solve_steepest, board, max_iter)
 
 @app.post("/api/solve/hill-climbing/stochastic")
 def run_stochastic(board: dict, max_iter: int = 100, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_stochastic(board, max_iter)
+    return run_timed(solve_stochastic, board, max_iter)
 
 @app.post("/api/solve/hill-climbing/sideways")
 def run_sideways(board: dict, max_iter: int = 100, max_sideways: int = 20, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_sideways(board, max_iter, max_sideways,seed)
+    return run_timed(solve_sideways, board, max_iter, max_sideways)
 
 @app.post("/api/solve/hill-climbing/random-restart")
 def run_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_random_restart(board, max_iter, max_restart)
+    return run_timed(solve_random_restart, board, max_iter, max_restart)
 
 @app.post("/api/solve/simulated-annealing")
 def run_simulated_annealing(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max_iter: int = 1000, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_sa(board, temperature, cooling_rate, max_iter)
+    return run_timed(solve_sa, board, temperature, cooling_rate, max_iter)
 
 @app.post("/api/solve/genetic-algorithm")
 def run_genetic_algorithm(board: dict, population_size: int = 20, max_iter: int = 100, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_ga(board, population_size, max_iter, seed)
+    return run_timed(solve_ga, board, population_size, max_iter, seed)

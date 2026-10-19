@@ -27,7 +27,14 @@ type SearchStep = {
   score?: number
   bestScore?: number
   averageScore?: number
+  deltaScore?: number
+  temperature?: number
+  expDeltaOverTemperature?: number | null
   acceptanceProbability?: number
+  accepted?: boolean
+  restart?: number
+  restartIteration?: number
+  restartStarted?: boolean
   state: Board
 }
 type SolveResult = {
@@ -46,6 +53,7 @@ type SolveResult = {
   restarts?: number
   maxRestart?: number
   iterationsPerRestart?: number[]
+  restartStats?: { restart: number; iterations: number; score: number; duration: number }[]
   stuckFrequency?: number
   populationSize?: number
 }
@@ -53,6 +61,14 @@ type Replay = {
   iteration: number
   score: number
   state: Board
+  deltaScore?: number
+  temperature?: number
+  expDeltaOverTemperature?: number | null
+  acceptanceProbability?: number
+  accepted?: boolean
+  restart?: number
+  restartIteration?: number
+  restartStarted?: boolean
 }
 
 const viewport = document.querySelector<HTMLDivElement>('#viewport')!
@@ -357,7 +373,14 @@ function renderStats(result: SolveResult): void {
   if (result.maxSideways !== undefined) lines.push(`Maximum sideways: ${result.maxSideways}`)
   if (result.restarts !== undefined) lines.push(`Restarts: ${result.restarts}`)
   if (result.maxRestart !== undefined) lines.push(`Maximum restarts: ${result.maxRestart}`)
-  if (result.iterationsPerRestart !== undefined) lines.push(`Iterations/restart: ${result.iterationsPerRestart.join(', ')}`)
+  if (result.restartStats === undefined && result.iterationsPerRestart !== undefined) {
+    lines.push(`Iterations/restart: ${result.iterationsPerRestart.join(', ')}`)
+  }
+  if (result.restartStats !== undefined) {
+    for (const restart of result.restartStats) {
+      lines.push(`Restart ${restart.restart}: ${restart.iterations} iterations, ${restart.duration.toFixed(4)} s, score ${restart.score}`)
+    }
+  }
   if (result.stuckFrequency !== undefined) lines.push(`Stuck frequency: ${result.stuckFrequency}`)
   if (result.populationSize !== undefined) lines.push(`Population: ${result.populationSize}`)
   statsContent.textContent = lines.join('\n')
@@ -425,8 +448,21 @@ function showFrame(index: number): void {
   renderPackages(frame.state)
 
   status.textContent =
-    `Iteration ${frame.iteration} / ${frames.length - 1} | ` +
-    `Score: ${frame.score}`
+    `Iteration ${frame.iteration} / ${frames.length - 1} | Score: ${frame.score}` +
+    (frame.accepted === undefined
+      ? ''
+      : ` | e^(ΔE/T): ${frame.expDeltaOverTemperature === null ? 'overflow' : frame.expDeltaOverTemperature?.toExponential(3) ?? '-'}`) +
+    (frame.restart === undefined
+      ? ''
+      : frame.restartStarted
+        ? ` | Restart ${frame.restart} started`
+        : ` | Restart ${frame.restart}, local iteration ${frame.restartIteration}`) +
+    (frame.accepted === undefined
+      ? ''
+      : ` | ΔE: ${frame.deltaScore ?? '-'}` +
+        ` | T: ${frame.temperature?.toExponential(3) ?? '-'}` +
+        ` | Successor ${frame.accepted ? 'accepted' : 'rejected'}` +
+        ` | P: ${frame.acceptanceProbability?.toFixed(4) ?? '-'}`)
 
   previousButton.disabled = currentFrame === 0
   nextButton.disabled = currentFrame === frames.length - 1
@@ -528,6 +564,14 @@ function runSolver(board: Board): void {
         iteration: step.iteration,
         score: step.score ?? step.bestScore ?? 0,
         state: step.state,
+        deltaScore: step.deltaScore,
+        temperature: step.temperature,
+        expDeltaOverTemperature: step.expDeltaOverTemperature,
+        acceptanceProbability: step.acceptanceProbability,
+        accepted: step.accepted,
+        restart: step.restart,
+        restartIteration: step.restartIteration,
+        restartStarted: step.restartStarted,
       })),
     ]
 

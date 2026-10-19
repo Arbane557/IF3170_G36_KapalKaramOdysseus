@@ -1,5 +1,6 @@
 from copy import deepcopy
 from random import choice,randrange,_inst
+from time import perf_counter
 from algo.common import create_random_individual, scoring, isvalid, curr_dimension
 
 def solve_steepest(board: dict, max_iter: int = 100) -> dict:
@@ -189,12 +190,32 @@ def solve_sideways(board: dict, max_iter: int = 100, max_sideways: int = 20) -> 
 
 
 def solve_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10) -> dict:
-    curr = create_random_individual(board,_inst)
-    init = deepcopy(curr)
+    started_at = perf_counter()
+    curr = None
+    init = None
     history = []
-    for iteration in range(0, max_restart):
+    restart_stats = []
+    total_iterations = 0
+
+    for restart_number in range(1, max_restart + 1):
+        restart_started_at = perf_counter()
         curr = create_random_individual(board,_inst)
-        for iteration in range(0, max_iter):
+        if init is None:
+            init = deepcopy(curr)
+
+        history.append({
+            "iteration": len(history) + 1,
+            "restart": restart_number,
+            "restartIteration": 0,
+            "restartStarted": True,
+            "score": scoring(curr),
+            "state": deepcopy(curr),
+        })
+
+        iterations_this_restart = 0
+        for restart_iteration in range(1, max_iter + 1):
+            iterations_this_restart = restart_iteration
+            total_iterations += 1
             best = None
             best_value = -1
 
@@ -241,10 +262,24 @@ def solve_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10
             curr = best
 
             history.append({
-                "iteration" : iteration + 1,
-                "score" : scoring(curr),
-                "state" : deepcopy(curr)
+                "iteration": len(history) + 1,
+                "restart": restart_number,
+                "restartIteration": restart_iteration,
+                "restartStarted": False,
+                "score": scoring(curr),
+                "state": deepcopy(curr),
             })
+
+        restart_stats.append({
+            "restart": restart_number,
+            "iterations": iterations_this_restart,
+            "score": scoring(curr),
+            "duration": perf_counter() - restart_started_at,
+        })
+
+    if init is None:
+        curr = create_random_individual(board,_inst)
+        init = deepcopy(curr)
 
     return {
         "algorithm" : "hill-climbing-random-restart",
@@ -254,7 +289,12 @@ def solve_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10
         "final" : curr,
         "initScore" : scoring(init),
         "finalScore" : scoring(curr),
-        "iterations" : len(history)
+        "iterations" : total_iterations,
+        "restarts": len(restart_stats),
+        "maxRestart": max_restart,
+        "iterationsPerRestart": [item["iterations"] for item in restart_stats],
+        "restartStats": restart_stats,
+        "duration": perf_counter() - started_at,
     }
 
 
