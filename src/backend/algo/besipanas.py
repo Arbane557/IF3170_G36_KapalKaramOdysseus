@@ -1,5 +1,5 @@
 from copy import deepcopy
-from random import choice,random
+from random import choice,random,randrange
 from math import exp
 def scoring(state: dict) -> float:
     return sum (
@@ -209,7 +209,28 @@ def neighbors(state: dict) -> list[dict]:
                 res.append(swapped)
 
     return res
+def gen_random_suc(curr):
+    while(True):
+        i = [k for k, _ in enumerate(curr["packages"])]
+        package= curr["packages"][i]
+        truck_dim = curr["truck"]["dimensions"]
 
+        orientation= choice(range(6))
+        rotated = deepcopy(package)
+        rotated["orientation"] = orientation
+        dim = curr_dimension(rotated)
+
+        x=randrange(0,truck_dim["w"] - dim["w"] + 1)
+        y=randrange(0,truck_dim["h"] - dim["h"] + 1)
+        z=randrange(0,truck_dim["l"] - dim["l"] + 1)
+
+        candidate = deepcopy(curr)
+        candidate["packages"][i]["orientation"] = orientation
+        candidate["packages"][i]["position"] = {"x": x, "y": y, "z": z}
+        candidate["packages"][i]["inTruck"] = choice([True, False])
+        if(isvalid(candidate)):
+            break
+    return candidate
 def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max_iter: int = 1000 ) -> dict:
     curr = deepcopy(board)
     init = deepcopy(curr)
@@ -217,7 +238,7 @@ def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max
 
     for iteration in range(0, max_iter):
         temperature*=cooling_rate
-        next=choice(neighbors(curr))
+        next=gen_random_suc(curr)
         delta_E=scoring(next)-scoring(curr)
         if(delta_E>0):
             curr = next
