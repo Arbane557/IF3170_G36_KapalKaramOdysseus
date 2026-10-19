@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from time import perf_counter
 
 from algo.ga import solve as solve_ga
 from algo.naikgunung import (
@@ -24,7 +25,10 @@ def health() -> dict[str, str]:
 
 @app.post("/api/solve/hill-climbing/steepest")
 def run_steepest(board: dict, max_iter: int = 100) -> dict:
-    return solve_steepest(board, max_iter)
+    start = perf_counter()
+    result = solve_steepest(board, max_iter)
+    result["duration"] = perf_counter() - start
+    return result
 
 @app.post("/api/solve/hill-climbing/stochastic")
 def run_stochastic(board: dict, max_iter: int = 100) -> dict:

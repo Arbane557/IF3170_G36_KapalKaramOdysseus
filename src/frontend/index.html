@@ -10,6 +10,20 @@
       <div id="status">Select a JSON file</div>
       <div id="input-controls">
         <input id="board-file" type="file" accept=".json,application/json" />
+        <select id="algorithm">
+          <option value="hill-climbing/steepest">Steepest Ascent</option>
+          <option value="hill-climbing/stochastic">Stochastic HC</option>
+          <option value="hill-climbing/sideways">HC Sideways</option>
+          <option value="hill-climbing/random-restart">Random Restart HC</option>
+          <option value="simulated-annealing">Simulated Annealing</option>
+          <option value="genetic-algorithm">Genetic Algorithm</option>
+        </select>
+        <label>Iterations <input id="max-iter" type="number" value="100" min="1" /></label>
+        <label id="sideways-field">Sideways <input id="max-sideways" type="number" value="20" min="0" /></label>
+        <label id="restart-field">Restarts <input id="max-restart" type="number" value="10" min="1" /></label>
+        <label id="temperature-field">Temperature <input id="temperature" type="number" value="100" min="0.001" step="0.1" /></label>
+        <label id="cooling-field">Cooling <input id="cooling-rate" type="number" value="0.95" min="0.001" max="0.999" step="0.001" /></label>
+        <label id="population-field">Population <input id="population-size" type="number" value="20" min="2" /></label>
         <button id="solve" disabled>Solve</button>
       </div>
       <div id="controls">
@@ -17,6 +31,12 @@
         <button id="play" disabled>Play</button>
         <button id="next" disabled>Next</button>
       </div>
+      <aside id="stats">
+        <h2>Run Statistics</h2>
+        <div id="stats-content">No result yet</div>
+        <svg id="score-chart" viewBox="0 0 300 130" aria-label="Objective score plot"></svg>
+        <svg id="probability-chart" viewBox="0 0 300 130" aria-label="Acceptance probability plot"></svg>
+      </aside>
       <div id="viewport"></div>
     </div>
     <script type="module" src="/src/main.ts"></script>
