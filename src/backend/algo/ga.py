@@ -75,7 +75,9 @@ def crossover(parent_a: dict, parent_b: dict, rng: Random) -> dict:
         ):
             child = candidate
         else:
-            find_random_valid_placement(child, package_index, rng)
+            repair_candidate = deepcopy(child)
+            if find_random_valid_placement(repair_candidate, package_index, rng):
+                child = repair_candidate
 
     return child
 
@@ -140,13 +142,15 @@ def mutate(individual: dict, rng: Random, mutation_rate: float = 0.15) -> dict:
 
     elif operation == "rotate":
         package_index = rng.randrange(package_count)
-        trial = deepcopy(mutated)
-        current_orientation = trial["packages"][package_index]["orientation"]
-        trial["packages"][package_index]["orientation"] = rng.choice(
-            ROTATION_NEIGHBORS[current_orientation]
-        )
-        if isvalid(trial):
-            return trial
+        current_orientation = mutated["packages"][package_index]["orientation"]
+        orientations = list(ROTATION_NEIGHBORS[current_orientation])
+        rng.shuffle(orientations)
+
+        for orientation in orientations:
+            trial = deepcopy(mutated)
+            trial["packages"][package_index]["orientation"] = orientation
+            if isvalid(trial):
+                return trial
 
     return mutated
 
