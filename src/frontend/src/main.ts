@@ -56,6 +56,7 @@ type SolveResult = {
   restartStats?: { restart: number; iterations: number; score: number; duration: number }[]
   stuckFrequency?: number
   populationSize?: number
+  generationStats?: { generation: number; maxScore: number; averageScore: number }[]
 }
 type Replay = {
   iteration: number
@@ -385,39 +386,90 @@ function renderStats(result: SolveResult): void {
   if (result.populationSize !== undefined) lines.push(`Population: ${result.populationSize}`)
   statsContent.textContent = lines.join('\n')
 
-  const scores = [
-    result.initScore,
-    ...(result.steps ?? []).map((step) => step.score ?? step.bestScore),
-  ].filter((score): score is number => score !== undefined)
-  const averageScores = (result.steps ?? [])
-    .map((step) => step.averageScore)
-    .filter((score): score is number => score !== undefined)
+  if (result.generationStats?.length) {
+    const generations = result.generationStats
+    const maximumScores = generations.map((item) => item.maxScore)
+    const averagePopulationScores = generations.map((item) => item.averageScore)
+    const allScores = [...maximumScores, ...averagePopulationScores]
+    const minimum = Math.min(...allScores)
+    const maximum = Math.max(...allScores)
+    const range = maximum - minimum || 1
+    const left = 48
+    const right = 290
+    const top = 30
+    const bottom = 122
+    const xPosition = (index: number) =>
+      left + index * (right - left) / Math.max(generations.length - 1, 1)
+    const yPosition = (score: number) =>
+      bottom - (score - minimum) * (bottom - top) / range
+    const maximumPoints = maximumScores
+      .map((score, index) => `${xPosition(index)},${yPosition(score)}`)
+      .join(' ')
+    const averagePoints = averagePopulationScores
+      .map((score, index) => `${xPosition(index)},${yPosition(score)}`)
+      .join(' ')
+    const maximumMarkers = maximumScores
+      .map((score, index) => `<circle cx="${xPosition(index)}" cy="${yPosition(score)}" r="2.5" fill="#ff0000" />`)
+      .join('')
+    const averageMarkers = averagePopulationScores
+      .map((score, index) => `<circle cx="${xPosition(index)}" cy="${yPosition(score)}" r="2.5" fill="#ffcc00" />`)
+      .join('')
 
-  if (scores.length < 2) {
-    scoreChart.style.display = 'none'
-    scoreChart.innerHTML = ''
+    scoreChart.setAttribute('viewBox', '0 0 300 160')
+    scoreChart.innerHTML =
+      `<line x1="${left}" y1="${top}" x2="${left}" y2="${bottom}" stroke="#000000" />` +
+      `<line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}" stroke="#000000" />` +
+      `<polyline points="${maximumPoints}" fill="none" stroke="#ff0000" stroke-width="3" />` +
+      `<polyline points="${averagePoints}" fill="none" stroke="#ffcc00" stroke-width="3" />` +
+      maximumMarkers +
+      averageMarkers +
+      `<line x1="40" y1="14" x2="56" y2="14" stroke="#ff0000" stroke-width="3" />` +
+      `<text x="60" y="17" font-size="10">Maximum</text>` +
+      `<line x1="142" y1="14" x2="158" y2="14" stroke="#ffcc00" stroke-width="3" />` +
+      `<text x="162" y="17" font-size="10">Population average</text>` +
+      `<text x="14" y="${top + 4}" font-size="9">${maximum.toFixed(1)}</text>` +
+      `<text x="14" y="${bottom}" font-size="9">${minimum.toFixed(1)}</text>` +
+      `<text transform="translate(7 105) rotate(-90)" font-size="9">Objective value</text>` +
+      `<text x="${left}" y="138" font-size="9">Gen 0</text>` +
+      `<text x="${right - 24}" y="138" font-size="9">Gen ${generations[generations.length - 1].generation}</text>` +
+      `<text x="132" y="154" font-size="10">Generation</text>`
+    scoreChart.style.display = 'block'
   } else {
-    const min = Math.min(...scores, ...averageScores)
-    const max = Math.max(...scores, ...averageScores)
-    const range = max - min || 1
-    const points = scores.map((score, index) => {
-      const x = 10 + index * 280 / (scores.length - 1)
-      const y = 120 - (score - min) * 110 / range
-      return `${x},${y}`
-    }).join(' ')
+    scoreChart.setAttribute('viewBox', '0 0 300 130')
+    const scores = [
+      result.initScore,
+      ...(result.steps ?? []).map((step) => step.score ?? step.bestScore),
+    ].filter((score): score is number => score !== undefined)
+    const averageScores = (result.steps ?? [])
+      .map((step) => step.averageScore)
+      .filter((score): score is number => score !== undefined)
 
-    let chartLines = `<polyline points="${points}" fill="none" stroke="#4ade80" stroke-width="3" />`
-    if (averageScores.length > 1) {
-      const averagePoints = averageScores.map((score, index) => {
-        const x = 10 + index * 280 / (averageScores.length - 1)
+    if (scores.length < 2) {
+      scoreChart.style.display = 'none'
+      scoreChart.innerHTML = ''
+    } else {
+      const min = Math.min(...scores, ...averageScores)
+      const max = Math.max(...scores, ...averageScores)
+      const range = max - min || 1
+      const points = scores.map((score, index) => {
+        const x = 10 + index * 280 / (scores.length - 1)
         const y = 120 - (score - min) * 110 / range
         return `${x},${y}`
       }).join(' ')
-      chartLines += `<polyline points="${averagePoints}" fill="none" stroke="#facc15" stroke-width="3" />`
-    }
 
-    scoreChart.innerHTML = chartLines
-    scoreChart.style.display = 'block'
+      let chartLines = `<polyline points="${points}" fill="none" stroke="#ff0000" stroke-width="3" />`
+      if (averageScores.length > 1) {
+        const averagePoints = averageScores.map((score, index) => {
+          const x = 10 + index * 280 / (averageScores.length - 1)
+          const y = 120 - (score - min) * 110 / range
+          return `${x},${y}`
+        }).join(' ')
+        chartLines += `<polyline points="${averagePoints}" fill="none" stroke="#ffcc00" stroke-width="3" />`
+      }
+
+      scoreChart.innerHTML = chartLines
+      scoreChart.style.display = 'block'
+    }
   }
 
   const probabilities = (result.steps ?? [])
