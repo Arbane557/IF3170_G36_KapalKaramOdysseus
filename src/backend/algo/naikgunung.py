@@ -1,5 +1,5 @@
 from copy import deepcopy
-
+from random import choice
 def scoring(state: dict) -> float:
     return sum (
         package["value"] for package in state["packages"] if package.get("inTruck", True)
@@ -280,11 +280,97 @@ def solve_steepest(board: dict, max_iter: int = 100) -> dict:
 
 
 def solve_stochastic(board: dict, max_iter: int = 100) -> dict:
-    return {}
+    curr = deepcopy(board)
+    init = deepcopy(curr)
+    history = []
+
+    for iteration in range(0, max_iter):
+
+        neighbor=choice(neighbors(curr))
+        if(scoring(neighbor)>scoring(curr)):
+            curr = neighbor
+
+        history.append({
+            "iteration" : iteration + 1,
+            "score" : scoring(curr),
+            "state" : deepcopy(curr)
+        })
+
+    return {
+        "init" : init,
+        "steps" : history,
+        "final" : curr,
+        "initScore" : scoring(init),
+        "finalScore" : scoring(curr),
+        "iterations" : len(history)
+    }
 
 
 def solve_sideways(board: dict, max_iter: int = 100, max_sideways: int = 20) -> dict:
-    return {}
+    curr = deepcopy(board)
+    init = deepcopy(curr)
+    history = []
+
+    for iteration in range(0, max_iter):
+        best = None
+        best_value = -1
+
+        for i, package in enumerate(curr["packages"]):
+            if package.get("inTruck", True):
+                continue
+
+            found = False
+            truck_dim = curr["truck"]["dimensions"]
+
+            for orientation in range(6):
+                rotated = deepcopy(package)
+                rotated["orientation"] = orientation
+                dim = curr_dimension(rotated)
+
+                for x in range(truck_dim["w"] - dim["w"] + 1):
+                    for y in range(truck_dim["h"] - dim["h"] + 1):
+                        for z in range(truck_dim["l"] - dim["l"] + 1):
+                            candidate = deepcopy(curr)
+                            candidate["packages"][i]["orientation"] = orientation
+                            candidate["packages"][i]["position"] = {"x": x, "y": y, "z": z}
+                            candidate["packages"][i]["inTruck"] = True
+
+                            if isvalid(candidate):
+                                if package["value"] > best_value:
+                                    best = candidate
+                                    best_value = package["value"]
+                                found = True
+                                break
+
+                        if found:
+                            break
+                    if found:
+                        break
+                if found:
+                    break
+
+        if best is None:
+            break
+
+        if scoring(best) < scoring(curr):
+            break
+
+        curr = best
+
+        history.append({
+            "iteration" : iteration + 1,
+            "score" : scoring(curr),
+            "state" : deepcopy(curr)
+        })
+
+    return {
+        "init" : init,
+        "steps" : history,
+        "final" : curr,
+        "initScore" : scoring(init),
+        "finalScore" : scoring(curr),
+        "iterations" : len(history)
+    }
 
 
 def solve_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10) -> dict:
