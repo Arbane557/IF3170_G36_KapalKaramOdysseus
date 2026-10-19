@@ -116,8 +116,7 @@ def mutate(individual: dict, rng: Random, mutation_rate: float = 0.15) -> dict:
 
 
 def next_generation(population: list[dict], rng: Random) -> list[dict]:
-    ordered_population = sorted(population, key=fitness, reverse=True)
-    next_population = [deepcopy(ordered_population[0])]
+    next_population = []
 
     while len(next_population) < len(population):
         parent_a = selection(population, rng)

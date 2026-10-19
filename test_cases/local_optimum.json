@@ -1,0 +1,184 @@
+{
+  "truck": {
+    "dimensions": { "w": 8, "l": 10, "h": 5 },
+    "maxCapacity": 220
+  },
+  "packages": [
+    {
+      "id": "A",
+      "dimensions": { "w": 8, "l": 10, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 125,
+      "weight": 220,
+      "isFragile": false,
+      "eta": 0,
+      "inTruck": false
+    },
+    {
+      "id": "S01",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 1,
+      "inTruck": false
+    },
+    {
+      "id": "S02",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 2,
+      "inTruck": false
+    },
+    {
+      "id": "S03",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 3,
+      "inTruck": false
+    },
+    {
+      "id": "S04",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 4,
+      "inTruck": false
+    },
+    {
+      "id": "S05",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 5,
+      "inTruck": false
+    },
+    {
+      "id": "S06",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 6,
+      "inTruck": false
+    },
+    {
+      "id": "S07",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 7,
+      "inTruck": false
+    },
+    {
+      "id": "S08",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 8,
+      "inTruck": false
+    },
+    {
+      "id": "S09",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 9,
+      "inTruck": false
+    },
+    {
+      "id": "S10",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 10,
+      "inTruck": false
+    },
+    {
+      "id": "S11",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 11,
+      "inTruck": false
+    },
+    {
+      "id": "S12",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 12,
+      "inTruck": false
+    },
+    {
+      "id": "S13",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 13,
+      "inTruck": false
+    },
+    {
+      "id": "S14",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 14,
+      "inTruck": false
+    },
+    {
+      "id": "S15",
+      "dimensions": { "w": 4, "l": 5, "h": 5 },
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "orientation": 0,
+      "value": 32,
+      "weight": 55,
+      "isFragile": false,
+      "eta": 15,
+      "inTruck": false
+    }
+  ]
+}
