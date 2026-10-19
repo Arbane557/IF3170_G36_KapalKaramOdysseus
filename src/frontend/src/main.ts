@@ -288,8 +288,8 @@ function makeBoaord(): Board {
   return selectedBoard
 }
 
-function renderPackageList(): void {
-  const packages = selectedBoard?.packages ?? []
+function renderPackageList(board: Board | undefined = selectedBoard): void {
+  const packages = board?.packages ?? []
   packageCount.textContent = `${packages.length} item${packages.length === 1 ? '' : 's'}`
   packageList.innerHTML = ''
 
@@ -498,6 +498,7 @@ function showFrame(index: number): void {
   const frame = frames[currentFrame]
 
   renderPackages(frame.state)
+  renderPackageList(frame.state)
 
   status.textContent =
     `Iteration ${frame.iteration} / ${frames.length - 1} | Score: ${frame.score}` +
