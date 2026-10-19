@@ -55,4 +55,4 @@ def run_simulated_annealing(board: dict, temperature: float = 100, cooling_rate:
 @app.post("/api/solve/genetic-algorithm")
 def run_genetic_algorithm(board: dict, population_size: int = 20, max_iter: int = 100, seed: int = 0) -> dict:
     set_seed(seed)
-    return solve_ga(board, population_size, max_iter)
+    return solve_ga(board, population_size, max_iter, seed)
