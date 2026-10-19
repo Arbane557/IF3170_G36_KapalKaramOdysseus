@@ -280,7 +280,7 @@ def solve_steepest(board: dict, max_iter: int = 100) -> dict:
 
 def gen_random_suc(curr):
     while(True):
-        i = [k for k, _ in enumerate(curr["packages"])]
+        i = choice([k for k, _ in enumerate(curr["packages"])])
         package= curr["packages"][i]
         truck_dim = curr["truck"]["dimensions"]
 
@@ -288,10 +288,11 @@ def gen_random_suc(curr):
         rotated = deepcopy(package)
         rotated["orientation"] = orientation
         dim = curr_dimension(rotated)
-
-        x=randrange(0,truck_dim["w"] - dim["w"] + 1)
-        y=randrange(0,truck_dim["h"] - dim["h"] + 1)
-        z=randrange(0,truck_dim["l"] - dim["l"] + 1)
+        if(truck_dim["w"] - dim["w"] + 1<=0 or truck_dim["h"] - dim["h"] + 1<=0 or truck_dim["l"] - dim["l"] + 1<=0):
+            continue
+        x=randrange(truck_dim["w"] - dim["w"] + 1)
+        y=randrange(truck_dim["h"] - dim["h"] + 1)
+        z=randrange(truck_dim["l"] - dim["l"] + 1)
 
         candidate = deepcopy(curr)
         candidate["packages"][i]["orientation"] = orientation
