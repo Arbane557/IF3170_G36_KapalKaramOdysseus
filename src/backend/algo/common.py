@@ -3,9 +3,15 @@ from random import Random
 from time import perf_counter
 
 def scoring(state: dict) -> float:
-    return sum (
-        package["value"] for package in state["packages"] if package.get("inTruck", True)
-    )
+    packages = [package for package in state["packages"] if package.get("inTruck", True)]
+
+    if state.get("scoringMode") == "value_eta":
+        return sum(
+            package["value"] + package["value"] / max(package.get("eta", 1), 1)
+            for package in packages
+        )
+
+    return sum(package["value"] for package in packages)
 
 def curr_dimension(package: dict) -> dict:
     w, h, l = package["dimensions"]["w"], package["dimensions"]["h"], package["dimensions"]["l"]

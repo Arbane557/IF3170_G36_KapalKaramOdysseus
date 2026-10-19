@@ -83,6 +83,7 @@ const boardFileInput = document.querySelector<HTMLInputElement>('#board-file')!
 const saveJsonButton = document.querySelector<HTMLButtonElement>('#save-json')!
 const solveButton = document.querySelector<HTMLButtonElement>('#solve')!
 const algorithmSelect = document.querySelector<HTMLSelectElement>('#algorithm')!
+const scoringModeSelect = document.querySelector<HTMLSelectElement>('#scoring-mode')!
 const maxIterInput = document.querySelector<HTMLInputElement>('#max-iter')!
 const maxSidewaysInput = document.querySelector<HTMLInputElement>('#max-sideways')!
 const maxRestartInput = document.querySelector<HTMLInputElement>('#max-restart')!
@@ -602,7 +603,8 @@ function runSolver(board: Board): void {
   fetch(`http://localhost:6969/api/solve/${algorithmSelect.value}?${params}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(board),
+    // i cant think of an easier way to just plug it here
+    body: JSON.stringify({ ...board, scoringMode: scoringModeSelect.value }),
   })
   .then((response) => {
     if (!response.ok) {
