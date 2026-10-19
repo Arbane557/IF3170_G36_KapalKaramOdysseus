@@ -3,51 +3,58 @@ from random import choice,randrange,_inst
 from time import perf_counter
 from algo.common import create_random_individual, scoring, isvalid, curr_dimension
 
+def generate_neighbors(state: dict) -> list[dict]:
+    neighbors = []
+    packages = state["packages"]
+    truck_dim = state["truck"]["dimensions"]
+
+    for i in range(len(packages)):
+        for j in range(i + 1, len(packages)):
+            if not packages[i].get("inTruck", False) and not packages[j].get("inTruck", False):
+                continue
+            candidate = deepcopy(state)
+            a, b = candidate["packages"][i], candidate["packages"][j]
+            a["position"], b["position"] = b["position"], a["position"]
+            a["inTruck"], b["inTruck"] = b.get("inTruck", False), a.get("inTruck", False)
+            if candidate != state and isvalid(candidate):
+                neighbors.append(candidate)
+
+    for i, package in enumerate(packages):
+        dim = curr_dimension(package)
+        for x in range(truck_dim["w"] - dim["w"] + 1):
+            for y in range(truck_dim["h"] - dim["h"] + 1):
+                for z in range(truck_dim["l"] - dim["l"] + 1):
+                    position = {"x": x, "y": y, "z": z}
+                    if package.get("inTruck", False) and package["position"] == position:
+                        continue
+                    candidate = deepcopy(state)
+                    candidate["packages"][i]["position"] = position
+                    candidate["packages"][i]["inTruck"] = True
+                    if isvalid(candidate):
+                        neighbors.append(candidate)
+
+    for i, package in enumerate(packages):
+        for orientation in range(6):
+            if orientation == package.get("orientation", 0):
+                continue
+            candidate = deepcopy(state)
+            candidate["packages"][i]["orientation"] = orientation
+            if isvalid(candidate):
+                neighbors.append(candidate)
+
+    return neighbors
+
 def solve_steepest(board: dict, max_iter: int = 100) -> dict:
     curr = create_random_individual(board,_inst)
     init = deepcopy(curr)
     history = []
 
     for iteration in range(0, max_iter):
-        best = None
-        best_value = -1
-
-        for i, package in enumerate(curr["packages"]):
-            if package.get("inTruck", True):
-                continue
-
-            found = False
-            truck_dim = curr["truck"]["dimensions"]
-
-            for orientation in range(6):
-                rotated = deepcopy(package)
-                rotated["orientation"] = orientation
-                dim = curr_dimension(rotated)
-
-                for x in range(truck_dim["w"] - dim["w"] + 1):
-                    for y in range(truck_dim["h"] - dim["h"] + 1):
-                        for z in range(truck_dim["l"] - dim["l"] + 1):
-                            candidate = deepcopy(curr)
-                            candidate["packages"][i]["orientation"] = orientation
-                            candidate["packages"][i]["position"] = {"x": x, "y": y, "z": z}
-                            candidate["packages"][i]["inTruck"] = True
-
-                            if isvalid(candidate):
-                                if package["value"] > best_value:
-                                    best = candidate
-                                    best_value = package["value"]
-                                found = True
-                                break
-
-                        if found:
-                            break
-                    if found:
-                        break
-                if found:
-                    break
-
-        if best is None:
+        neighbors = generate_neighbors(curr)
+        if not neighbors:
             break
+
+        best = max(neighbors, key=scoring)
 
         if scoring(best) <= scoring(curr):
             break
@@ -144,45 +151,11 @@ def solve_sideways(board: dict, max_iter: int = 100, max_sideways: int = 20) -> 
     history = []
 
     for iteration in range(0, max_iter):
-        best = None
-        best_value = -1
-
-        for i, package in enumerate(curr["packages"]):
-            if package.get("inTruck", True):
-                continue
-
-            found = False
-            truck_dim = curr["truck"]["dimensions"]
-
-            for orientation in range(6):
-                rotated = deepcopy(package)
-                rotated["orientation"] = orientation
-                dim = curr_dimension(rotated)
-
-                for x in range(truck_dim["w"] - dim["w"] + 1):
-                    for y in range(truck_dim["h"] - dim["h"] + 1):
-                        for z in range(truck_dim["l"] - dim["l"] + 1):
-                            candidate = deepcopy(curr)
-                            candidate["packages"][i]["orientation"] = orientation
-                            candidate["packages"][i]["position"] = {"x": x, "y": y, "z": z}
-                            candidate["packages"][i]["inTruck"] = True
-
-                            if isvalid(candidate):
-                                if package["value"] > best_value:
-                                    best = candidate
-                                    best_value = package["value"]
-                                found = True
-                                break
-
-                        if found:
-                            break
-                    if found:
-                        break
-                if found:
-                    break
-
-        if best is None:
+        neighbors = generate_neighbors(curr)
+        if not neighbors:
             break
+
+        best = max(neighbors, key=scoring)
 
         if scoring(best) < scoring(curr):
             break
@@ -232,45 +205,11 @@ def solve_random_restart(board: dict, max_iter: int = 100, max_restart: int = 10
         for restart_iteration in range(1, max_iter + 1):
             iterations_this_restart = restart_iteration
             total_iterations += 1
-            best = None
-            best_value = -1
-
-            for i, package in enumerate(curr["packages"]):
-                if package.get("inTruck", True):
-                    continue
-
-                found = False
-                truck_dim = curr["truck"]["dimensions"]
-
-                for orientation in range(6):
-                    rotated = deepcopy(package)
-                    rotated["orientation"] = orientation
-                    dim = curr_dimension(rotated)
-
-                    for x in range(truck_dim["w"] - dim["w"] + 1):
-                        for y in range(truck_dim["h"] - dim["h"] + 1):
-                            for z in range(truck_dim["l"] - dim["l"] + 1):
-                                candidate = deepcopy(curr)
-                                candidate["packages"][i]["orientation"] = orientation
-                                candidate["packages"][i]["position"] = {"x": x, "y": y, "z": z}
-                                candidate["packages"][i]["inTruck"] = True
-
-                                if isvalid(candidate):
-                                    if package["value"] > best_value:
-                                        best = candidate
-                                        best_value = package["value"]
-                                    found = True
-                                    break
-
-                            if found:
-                                break
-                        if found:
-                            break
-                    if found:
-                        break
-
-            if best is None:
+            neighbors = generate_neighbors(curr)
+            if not neighbors:
                 break
+
+            best = max(neighbors, key=scoring)
 
             if scoring(best) <= scoring(curr):
                 break
