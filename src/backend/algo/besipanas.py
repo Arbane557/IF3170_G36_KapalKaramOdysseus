@@ -12,6 +12,9 @@ def gen_random_suc(curr):
 
         action = choice(["swap", "move", "rotate"])
 
+        if(action=="rotate" and not package.get("inTruck", False)):
+            continue
+
         orientation= choice([o for o in range(6) if o != package["orientation"]]) if action=="rotate" else package["orientation"]
         rotated = deepcopy(package)
         rotated["orientation"] = orientation
@@ -25,17 +28,23 @@ def gen_random_suc(curr):
             y=randrange(truck_dim["h"] - dim["h"] + 1)
             z=randrange(truck_dim["l"] - dim["l"] + 1)
             position = {"x": x, "y": y, "z": z}
+            if(package.get("inTruck", False) and position == package["position"]):
+                continue
 
         candidate = deepcopy(curr)
         candidate["packages"][i]["orientation"] = orientation
         candidate["packages"][i]["position"] = position
+        if(action=="move"):
+            candidate["packages"][i]["inTruck"] = True
 
         if(action=="swap"):
             if(len(curr["packages"]) < 2):
                 continue
             j = choice([k for k, _ in enumerate(curr["packages"]) if k != i])
+            if(not curr["packages"][i].get("inTruck", False) and not curr["packages"][j].get("inTruck", False)):
+                continue
             a, b = candidate["packages"][i], candidate["packages"][j]
-            for key in ["position", "orientation", "inTruck"]:
+            for key in ["position", "inTruck"]:
                 a[key], b[key] = b[key], a[key]
 
         if(isvalid(candidate)):
