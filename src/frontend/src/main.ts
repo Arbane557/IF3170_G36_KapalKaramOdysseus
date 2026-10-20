@@ -100,7 +100,6 @@ const coolingField = document.querySelector<HTMLElement>('#cooling-field')!
 const populationField = document.querySelector<HTMLElement>('#population-field')!
 const statsContent = document.querySelector<HTMLDivElement>('#stats-content')!
 const scoreChart = document.querySelector<SVGSVGElement>('#score-chart')!
-const probabilityChart = document.querySelector<SVGSVGElement>('#probability-chart')!
 const seedInput = document.querySelector<HTMLInputElement>('#seed')!
 const truckWInput = document.querySelector<HTMLInputElement>('#truck-w')!
 const truckLInput = document.querySelector<HTMLInputElement>('#truck-l')!
@@ -351,7 +350,6 @@ function loadBoardIntoEditor(board: Board): void {
   renderPackageList()
   statsContent.textContent = 'No result yet'
   scoreChart.style.display = 'none'
-  probabilityChart.style.display = 'none'
   firstButton.disabled = true
   previousButton.disabled = true
   playButton.disabled = true
@@ -478,22 +476,6 @@ function renderStats(result: SolveResult): void {
       scoreChart.innerHTML = chartLines
       scoreChart.style.display = 'block'
     }
-  }
-
-  const probabilities = (result.steps ?? [])
-    .map((step) => step.acceptanceProbability)
-    .filter((value): value is number => value !== undefined)
-  if (probabilities.length > 1) {
-    const points = probabilities.map((value, index) => {
-      const x = 10 + index * 280 / (probabilities.length - 1)
-      const y = 120 - value * 110
-      return `${x},${y}`
-    }).join(' ')
-    probabilityChart.innerHTML = `<polyline points="${points}" fill="none" stroke="#38bdf8" stroke-width="3" />`
-    probabilityChart.style.display = 'block'
-  } else {
-    probabilityChart.innerHTML = ''
-    probabilityChart.style.display = 'none'
   }
 }
 
@@ -624,7 +606,6 @@ function runSolver(board: Board): void {
       frames = []
       statsContent.textContent = result.message ?? 'Algorithm is not implemented yet.'
       scoreChart.style.display = 'none'
-      probabilityChart.style.display = 'none'
       status.textContent = result.message ?? 'Not implemented yet'
       return
     }

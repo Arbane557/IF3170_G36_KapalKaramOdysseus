@@ -126,7 +126,7 @@ td button { width: auto; padding: 3px 6px; }
     line-height: 1.45;
     white-space: pre-line;
 }
-#score-chart, #probability-chart {
+#score-chart {
     display: none;
     width: 100%;
     margin-top: 8px;
