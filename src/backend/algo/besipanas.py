@@ -55,6 +55,7 @@ def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max
     curr = create_random_individual(board,_inst)
     init = deepcopy(curr)
     history = []
+    stuck_count = 0
 
     for iteration in range(0, max_iter):
         temperature*=cooling_rate
@@ -74,9 +75,11 @@ def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max
                 exponential_value = None
 
         acceptance_probability = 1.0 if delta_E >= 0 else (exponential_value or 0.0)
-        accepted = delta_E >= 0 or random() < acceptance_probability
+        accepted = delta_E > 0 or random() < acceptance_probability
         if accepted:
             curr = successor
+        else:
+            stuck_count += 1
 
         history.append({
             "iteration" : iteration + 1,
@@ -86,6 +89,7 @@ def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max
             "expDeltaOverTemperature": exponential_value,
             "acceptanceProbability": acceptance_probability,
             "accepted": accepted,
+            "stuckCount": stuck_count,
             "state" : deepcopy(curr)
         })
 
@@ -96,5 +100,6 @@ def solve(board: dict, temperature: float = 100, cooling_rate: float = 0.95, max
         "initScore" : scoring(init),
         "finalScore" : scoring(curr),
         "iterations" : len(history),
+        "stuckFrequency": stuck_count,
         "duration": perf_counter() - started_at,
     }

@@ -32,6 +32,7 @@ type SearchStep = {
   expDeltaOverTemperature?: number | null
   acceptanceProbability?: number
   accepted?: boolean
+  stuckCount?: number
   restart?: number
   restartIteration?: number
   restartStarted?: boolean
@@ -67,6 +68,8 @@ type Replay = {
   expDeltaOverTemperature?: number | null
   acceptanceProbability?: number
   accepted?: boolean
+  stuckCount?: number
+  totalStuck?: number
   restart?: number
   restartIteration?: number
   restartStarted?: boolean
@@ -507,6 +510,9 @@ function showFrame(index: number): void {
 
   status.textContent =
     `Iteration ${frame.iteration} / ${frames.length - 1} | Score: ${frame.score}` +
+    (frame.stuckCount !== undefined && frame.totalStuck !== undefined
+      ? ` | Stuck: ${frame.stuckCount}/${frame.totalStuck}`
+      : '') +
     (frame.accepted === undefined
       ? ''
       : ` | e^(ΔE/T): ${frame.expDeltaOverTemperature === null ? 'overflow' : frame.expDeltaOverTemperature?.toExponential(3) ?? '-'}`) +
@@ -625,25 +631,42 @@ function runSolver(board: Board): void {
 
     if (!result.init || !result.steps) throw new Error('Incomplete solver response')
 
+    const isSimulatedAnnealing =
+      result.stuckFrequency !== undefined ||
+      result.steps.some((step) => step.accepted !== undefined)
+    const totalStuck = isSimulatedAnnealing
+      ? (result.stuckFrequency ?? result.steps.filter((step) => step.accepted === false).length)
+      : undefined
+    let runningStuck = 0
+
     frames = [
       {
         iteration: 0,
         score: result.initScore ?? 0,
         state: result.init,
+        stuckCount: isSimulatedAnnealing ? 0 : undefined,
+        totalStuck,
       },
-      ...result.steps.map((step) => ({
-        iteration: step.iteration,
-        score: step.score ?? step.bestScore ?? 0,
-        state: step.state,
-        deltaScore: step.deltaScore,
-        temperature: step.temperature,
-        expDeltaOverTemperature: step.expDeltaOverTemperature,
-        acceptanceProbability: step.acceptanceProbability,
-        accepted: step.accepted,
-        restart: step.restart,
-        restartIteration: step.restartIteration,
-        restartStarted: step.restartStarted,
-      })),
+      ...result.steps.map((step) => {
+        if (step.accepted === false) {
+          runningStuck += 1
+        }
+        return {
+          iteration: step.iteration,
+          score: step.score ?? step.bestScore ?? 0,
+          state: step.state,
+          deltaScore: step.deltaScore,
+          temperature: step.temperature,
+          expDeltaOverTemperature: step.expDeltaOverTemperature,
+          acceptanceProbability: step.acceptanceProbability,
+          accepted: step.accepted,
+          stuckCount: isSimulatedAnnealing ? (step.stuckCount ?? runningStuck) : undefined,
+          totalStuck,
+          restart: step.restart,
+          restartIteration: step.restartIteration,
+          restartStarted: step.restartStarted,
+        }
+      }),
     ]
 
     renderTruck(result.init)
